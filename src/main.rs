@@ -1,7 +1,7 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
 
-use builtin::exit::exit;
+use builtin::{echo::echo, exit::exit};
 
 mod builtin;
 fn main() {
@@ -15,14 +15,13 @@ fn main() {
 
         let command_line = input.split(" ").collect::<Vec<&str>>();
         let builtin = command_line[0].trim();
+        let args = command_line[1..].to_vec();
         match builtin {
             "exit" => {
-                let code = if command_line.len() > 1 {
-                    command_line[1].trim().parse::<i32>().unwrap()
-                } else {
-                    0
-                };
-                exit(code);
+                exit(args);
+            }
+            "echo" => {
+                echo(args);
             }
             _ => {
                 println!("{}: command not found", builtin);
