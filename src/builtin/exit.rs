@@ -1,9 +1,8 @@
 pub fn exit(args: Vec<&str>) {
     if let Some(exit_code) = args.get(0) {
-        if let Ok(exit_code) = exit_code.parse::<i32>() {
-            std::process::exit(exit_code);
-        } else {
-            std::process::exit(1);
+        match exit_code.parse::<i32>() {
+            Ok(code) => std::process::exit(code),
+            Err(_) => std::process::exit(0),
         }
     } else {
         std::process::exit(0);

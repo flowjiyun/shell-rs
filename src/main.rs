@@ -13,7 +13,7 @@ fn main() {
         let mut input = String::new();
         stdin.read_line(&mut input).unwrap();
 
-        let command_line = input.split(" ").collect::<Vec<&str>>();
+        let command_line = input.trim().split(" ").collect::<Vec<&str>>();
         let builtin = command_line[0].trim();
         let args = command_line[1..].to_vec();
         match builtin {
