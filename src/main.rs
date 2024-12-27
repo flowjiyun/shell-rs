@@ -1,7 +1,7 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
 
-use builtin::{echo::echo, exit::exit};
+use builtin::{bt_echo::bt_echo, bt_exit::bt_exit, bt_type::bt_type};
 
 mod builtin;
 fn main() {
@@ -18,10 +18,13 @@ fn main() {
         let args = command_line[1..].to_vec();
         match builtin {
             "exit" => {
-                exit(args);
-            }
+                bt_exit(args);
+            },
             "echo" => {
-                echo(args);
+                bt_echo(args);
+            },
+            "type" => {
+                bt_type(args);
             }
             _ => {
                 println!("{}: command not found", builtin);
