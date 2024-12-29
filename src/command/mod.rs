@@ -1,3 +1,5 @@
+use std::fs;
+
 use crate::{builtin::{bt_echo::bt_echo, bt_exit::bt_exit, bt_type::bt_type}, BUILTIN_SET};
 
 
@@ -11,7 +13,7 @@ enum BuiltInImpl {
 #[derive(Debug, Clone, Copy)]
 enum CommandType {
     BuiltIn(BuiltInImpl),
-    Unknown,
+    External,
 }
 
 #[derive(Debug, Clone)]
@@ -36,7 +38,7 @@ impl Command {
         if let Some(builtin) = Self::_check_builtin(prog) {
            return CommandType::BuiltIn(builtin);
         } else {
-           return CommandType::Unknown;
+           return CommandType::External;
         }
     }
 
@@ -69,8 +71,23 @@ impl Command {
                     },
                 }
             },
-            CommandType::Unknown => {
-                println!("{}: command not found", self._prog);
+            CommandType::External => {
+                Self::_execute_external(&self._prog, &self._args);
+            }
+        }
+    }
+
+    fn _execute_external(prog: &str, args: &Vec<String>) {
+        let env_path = std::env::var("PATH").unwrap_or_default();
+        let paths: Vec<&str> = env_path.split(":").collect();
+        for path in paths {
+            let full_path = format!("{}/{}", path, prog);
+            if fs::metadata(&full_path).is_ok() {
+                if let Ok(mut command) = std::process::Command::new(full_path.as_str()) 
+                    .args(args)
+                    .spawn() {
+                        let _ = command.wait();
+                    }
             }
         }
     }
