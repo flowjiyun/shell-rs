@@ -88,7 +88,9 @@ impl Command {
                     .spawn() {
                         let _ = command.wait();
                     }
+                return;
             }
         }
+        println!("{}: command not found", prog);
     }
 }
