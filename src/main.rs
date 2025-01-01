@@ -47,8 +47,13 @@ fn preprocess_input(input: &str) -> Vec<String> {
         match c {
             '\'' | '\"' => {
                 if !is_in_quote {
-                    is_in_quote = true;
-                    quote_char = c;
+                    if is_in_escape {
+                        cur_token.push(c);
+                        is_in_escape = false;
+                    } else {
+                        is_in_quote = true;
+                        quote_char = c;
+                    }
                 } else {
                     if quote_char == c {
                         is_in_quote = false;
