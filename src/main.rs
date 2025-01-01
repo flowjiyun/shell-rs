@@ -25,11 +25,54 @@ fn main() {
         let mut input = String::new();
         stdin.read_line(&mut input).unwrap();
 
-        let command_line: Vec<String> = input.trim().split_whitespace().map(String::from).collect();
+        let command_line = preprocess_input(input.trim());
+        if command_line.is_empty() {
+            continue;
+        }
         let prog = command_line[0].trim();
         let args = command_line[1..].to_vec();
 
         let command = Command::new(prog.to_string(), args);
         command.execute();
     }
+}
+
+fn preprocess_input(input: &str) -> Vec<String> {
+    let mut tokens: Vec<String> = Vec::new();
+    let mut cur_token = String::new();
+    let mut is_in_quote = false;
+    let mut quote_char = '\0';
+    for c in input.chars() {
+        match c {
+            '\'' | '\"' => {
+                if !is_in_quote {
+                    is_in_quote = true;
+                    quote_char = c;
+                } else {
+                    if quote_char == c {
+                        is_in_quote = false;
+                    } else {
+                        cur_token.push(c);
+                    }
+                }
+            },
+            ' ' => {
+                if is_in_quote {
+                    cur_token.push(c);
+                } else {
+                    if !cur_token.is_empty() {
+                        tokens.push(cur_token.clone());
+                        cur_token.clear();
+                    }
+                }
+            },
+            _ => {
+                cur_token.push(c);
+            }
+        }
+    }
+    if !cur_token.is_empty() {
+        tokens.push(cur_token.clone());
+    }
+    tokens
 }
