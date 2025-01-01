@@ -1,6 +1,6 @@
 use std::fs;
 
-use crate::{builtin::{bt_echo::bt_echo, bt_exit::bt_exit, bt_type::bt_type}, BUILTIN_SET};
+use crate::{builtin::{bt_echo::bt_echo, bt_exit::bt_exit, bt_pwd::bt_pwd, bt_type::bt_type}, BUILTIN_SET};
 
 
 #[derive(Debug, Clone, Copy)]
@@ -8,6 +8,7 @@ enum BuiltInImpl {
     Exit,
     Echo,
     Type,
+    Pwd,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -48,6 +49,7 @@ impl Command {
                 "exit" => Some(BuiltInImpl::Exit),
                 "echo" => Some(BuiltInImpl::Echo),
                 "type" => Some(BuiltInImpl::Type),
+                "pwd" => Some(BuiltInImpl::Pwd),
                 _ => None,
             }
         } else {
@@ -69,6 +71,9 @@ impl Command {
                     BuiltInImpl::Type => {
                         bt_type(self._args.clone());
                     },
+                    BuiltInImpl::Pwd => {
+                        bt_pwd();
+                    }
                 }
             },
             CommandType::External => {
