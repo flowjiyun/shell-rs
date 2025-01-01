@@ -13,6 +13,7 @@ static BUILTIN_SET: LazyLock<HashSet<String>> = LazyLock::new(|| {
     builtin_set.insert("echo".to_string());
     builtin_set.insert("type".to_string());
     builtin_set.insert("pwd".to_string());
+    builtin_set.insert("cd".to_string());
     builtin_set
 });
 fn main() {
