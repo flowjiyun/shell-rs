@@ -33,7 +33,7 @@ impl Tokenizer {
                                 if next_char == '\\'
                                     || next_char == '$'
                                     || next_char == '\"'
-                                    || next_char == 'n'
+                                    || next_char == '\n'
                                 {
                                     cur_token.push(next_char);
                                     chars.next();
