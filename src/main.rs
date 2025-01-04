@@ -3,9 +3,11 @@ use std::io::{self, Write};
 use std::{collections::HashSet, sync::LazyLock};
 
 use command::Command;
+use tokenizer::Tokenizer;
 
 mod builtin;
 mod command;
+mod tokenizer;
 
 static BUILTIN_SET: LazyLock<HashSet<String>> = LazyLock::new(|| {
     let mut builtin_set: HashSet<String> = HashSet::new();
@@ -38,64 +40,5 @@ fn main() {
 }
 
 fn preprocess_input(input: &str) -> Vec<String> {
-    let mut tokens: Vec<String> = Vec::new();
-    let mut cur_token = String::new();
-    let mut is_in_quote = false;
-    let mut is_in_escape = false;
-    let mut quote_char = '\0';
-    for c in input.chars() {
-        match c {
-            '\'' | '\"' => {
-                if !is_in_quote {
-                    if is_in_escape {
-                        cur_token.push(c);
-                        is_in_escape = false;
-                    } else {
-                        is_in_quote = true;
-                        quote_char = c;
-                    }
-                } else {
-                    if quote_char == c {
-                        is_in_quote = false;
-                    } else {
-                        cur_token.push(c);
-                    }
-                }
-            },
-            '\\' => {
-                if is_in_quote {
-                    cur_token.push(c);
-                } else {
-                    if is_in_escape {
-                        cur_token.push(c);
-                        is_in_escape = false;
-                    } else {
-                        is_in_escape = true;
-                    }
-                }
-            },
-            ' ' => {
-                if is_in_quote {
-                    cur_token.push(c);
-                } else {
-                    if !cur_token.is_empty() {
-                        if is_in_escape {
-                            cur_token.push(c);
-                            is_in_escape = false;
-                        } else {
-                            tokens.push(cur_token.clone());
-                            cur_token.clear();
-                        }
-                    }
-                }
-            },
-            _ => {
-                cur_token.push(c);
-            }
-        }
-    }
-    if !cur_token.is_empty() {
-        tokens.push(cur_token.clone());
-    }
-    tokens
+    Tokenizer::tokenize(input)
 }
