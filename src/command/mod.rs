@@ -96,7 +96,7 @@ impl Command {
             let full_path = format!("{}/{}", path, prog);
             if fs::metadata(&full_path).is_ok() {
                 if let Some(stdout_file) = file_map.get_mut("1") {
-                    if let Ok(mut command) = std::process::Command::new(full_path.as_str()) 
+                    if let Ok(mut command) = std::process::Command::new(prog) 
                         .args(args)
                         .stdout(stdout_file.try_clone().unwrap())
                         .spawn() {
@@ -104,7 +104,7 @@ impl Command {
                     }
                     return;
                 } else {
-                    if let Ok(mut command) = std::process::Command::new(full_path.as_str())
+                    if let Ok(mut command) = std::process::Command::new(prog)
                         .args(args)
                         .spawn() {
                             let _ = command.wait();
