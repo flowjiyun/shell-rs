@@ -1,4 +1,4 @@
-use std::fs;
+use std::{collections::HashMap, fs::{self, File}};
 
 use crate::{builtin::{bt_cd::bt_cd, bt_echo::bt_echo, bt_exit::bt_exit, bt_pwd::bt_pwd, bt_type::bt_type}, BUILTIN_SET};
 
@@ -18,21 +18,23 @@ enum CommandType {
     External,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Command {
     _type: CommandType,
     _prog: String,
     _args: Vec<String>,
+    _file_map: HashMap<String, File>,
 }
 
 impl Command {
-    pub fn new(prog: String, args: Vec<String>) -> Self {
+    pub fn new(prog: String, args: Vec<String>, file_map: HashMap<String, File>) -> Self {
         // init command type
         let command_type = Self::_check_command_type(&prog);
         Self {
             _type: command_type,
             _prog: prog,
             _args: args,
+            _file_map: file_map,
         }
 
     }
@@ -59,7 +61,7 @@ impl Command {
         }
     }
 
-    pub fn execute(&self) {
+    pub fn execute(&mut self) {
         match self._type {
             CommandType::BuiltIn(builtin) => {
                 match builtin  {
@@ -67,7 +69,7 @@ impl Command {
                         bt_exit(self._args.clone());
                     },
                     BuiltInImpl::Echo => {
-                        bt_echo(self._args.clone());
+                        bt_echo(self._args.clone(), &mut self._file_map);
 
                     },
                     BuiltInImpl::Type => {
@@ -82,23 +84,33 @@ impl Command {
                 }
             },
             CommandType::External => {
-                Self::_execute_external(&self._prog, &self._args);
+                Self::_execute_external(&self._prog, &self._args, &mut self._file_map);
             }
         }
     }
 
-    fn _execute_external(prog: &str, args: &Vec<String>) {
+    fn _execute_external(prog: &str, args: &Vec<String>, file_map: &mut HashMap<String, File>) {
         let env_path = std::env::var("PATH").unwrap_or_default();
         let paths: Vec<&str> = env_path.split(":").collect();
         for path in paths {
             let full_path = format!("{}/{}", path, prog);
             if fs::metadata(&full_path).is_ok() {
-                if let Ok(mut command) = std::process::Command::new(full_path.as_str()) 
-                    .args(args)
-                    .spawn() {
-                        let _ = command.wait();
+                if let Some(stdout_file) = file_map.get_mut("1") {
+                    if let Ok(mut command) = std::process::Command::new(full_path.as_str()) 
+                        .args(args)
+                        .stdout(stdout_file.try_clone().unwrap())
+                        .spawn() {
+                            let _ = command.wait();
                     }
-                return;
+                    return;
+                } else {
+                    if let Ok(mut command) = std::process::Command::new(full_path.as_str())
+                        .args(args)
+                        .spawn() {
+                            let _ = command.wait();
+                    }
+                    return;
+                }
             }
         }
         println!("{}: command not found", prog);
