@@ -14,7 +14,7 @@ pub fn bt_echo(args: Vec<String>, file_map: &mut HashMap<String, File>) {
     }
 
     for (fd, file) in file_map.iter_mut() {
-        if fd == "1" {
+        if fd == "1" || fd == "2" {
             if let Err(e) = writeln!(file, "{}", output) {
                 eprintln!("{}", e);
             }

@@ -95,20 +95,18 @@ impl Command {
         for path in paths {
             let full_path = format!("{}/{}", path, prog);
             if fs::metadata(&full_path).is_ok() {
-                if let Some(stdout_file) = file_map.get_mut("1") {
-                    if let Ok(mut command) = std::process::Command::new(prog) 
-                        .args(args)
-                        .stdout(stdout_file.try_clone().unwrap())
-                        .spawn() {
-                            let _ = command.wait();
-                    }
-                    return;
-                } else {
-                    if let Ok(mut command) = std::process::Command::new(prog)
-                        .args(args)
-                        .spawn() {
-                            let _ = command.wait();
-                    }
+                let stdout_file = file_map.get_mut("1").map(|file| file.try_clone().unwrap());
+                let stderr_file = file_map.get_mut("2").map(|file| file.try_clone().unwrap());
+                let mut command = std::process::Command::new(prog);
+                command.args(args);
+                if let Some(stdout_file) = stdout_file {
+                    command.stdout(stdout_file);
+                }
+                if let Some(stderr_file) = stderr_file {
+                    command.stderr(stderr_file);
+                }
+                if let Ok(mut command) = command.spawn() {
+                    let _ = command.wait();
                     return;
                 }
             }

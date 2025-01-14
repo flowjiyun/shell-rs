@@ -55,7 +55,7 @@ fn preprocess_redirection(tokens: &Vec<String>, command_line: &mut Vec<String>, 
     let mut tokens = tokens.iter().peekable();
 
     while let Some(token) = tokens.next() {
-        if token == ">" || token == "1>" {
+        if token == ">" || token == "1>" || token == "2>" {
             match tokens.peek() {
                 Some(&next_token) => {
                     redirections.push((token.to_string(), next_token.to_string()));
@@ -83,6 +83,15 @@ fn process_redirection(redirections: &Vec<(String, String)>) -> HashMap<String, 
                     .open(file)
                     .unwrap();
                 file_map.insert("1".to_string(), file);
+            },
+            "2>" => {
+                let file = std::fs::OpenOptions::new()
+                    .write(true)
+                    .create(true)
+                    .truncate(true)
+                    .open(file)
+                    .unwrap();
+                file_map.insert("2".to_string(), file);
             },
             _ => {
                 eprintln!("syntax error: unknown redirection operator");
